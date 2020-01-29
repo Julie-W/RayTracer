@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Build main (Debug)",
+        "type": "shell",
+        "command": "bazel build main -c dbg",
+        "windows": {
+          "command": "bazel build main --experimental_enable_runfiles -c dbg"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+      }
+    ]
+  }

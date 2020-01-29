@@ -1,0 +1,23 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "main",
+            "preLaunchTask": "Build main (Debug)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bazel-out/x64_windows-dbg/bin/main.exe",
+            "args": ["${workspaceFolder}/demo.txt","${workspaceFolder}/input.txt"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "sourceFileMap": {
+                "C:/Users/woute/_bazel_woute/y7magqxw/execroot/__main__/src": "${workspaceFolder}/src"
+            }
+        }
+    ]
+}
