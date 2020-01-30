@@ -10,17 +10,7 @@
 *
 * DO NOT MODIFY THIS FILE WHEN DOING THE HOMEWORK ASSIGNMENT
 ***************************************************************************/
-#ifndef _GLUT_SHAPES_REPLACEMENT
-#define _GLUT_SHAPES_REPLACEMENT
 
-#include <GL/glew.h>
-#include <GL/glut.h>
-// Force glm to use radians since usage of degrees is deprecated
-#ifndef GLM_FORCE_RADIANS
-#define GLM_FORCE_RADIANS
-#endif
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <vector>
 #include <fstream>
