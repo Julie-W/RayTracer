@@ -4,12 +4,15 @@
 #include <functional>
 #include <iostream>
 #include <thread>
+#include "scene.hpp"
+#include "viewPlane.hpp"
 
 #define internal static
 #define local_persist static
 #define global_variable static
 
 global_variable bool running;
+global_variable Scene scene;
 
 struct offscreenBuffer {
     BITMAPINFO bitmapInfo;
@@ -34,22 +37,24 @@ windowDimension getWindowDimension(HWND window){
     return result;
 }
 
-void renderWeirdGradient(offscreenBuffer &buffer){
+void render(offscreenBuffer &buffer){
+    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90, 90);
     UINT8 *row = (UINT8 *)buffer.bitmapMemory;
     int offset = 0;
     for(int y = 0; y < buffer.height; y++){
         UINT32 *pixel = (UINT32 *)row;
         for(int x = 0; x < buffer.width; x++){
+            Vector3f color = viewPlane.getPixelColor(x,y,scene);
             // Pixel in memory: bb gg rr xx
-            UINT8 blue = (x + offset);
-            UINT8 green = (y + offset);
-            UINT8 red = 255;
-            *pixel = (red << 16) | (green << 8) | blue; //updates pixel after writing
-            offset++;
+            UINT8 blue = color[2];
+            UINT8 green = color[1];
+            UINT8 red = color[0];
+            *pixel = (red << 16) | (green << 8) | blue;
             pixel++;
         }
         row += buffer.pitch;
     }
+
 }
 
 void resizeDIBSection(offscreenBuffer &buffer, int width, int height){
@@ -68,7 +73,7 @@ void resizeDIBSection(offscreenBuffer &buffer, int width, int height){
     int bitmapMemorySize = buffer.bytesPerPixel*width*height;
     buffer.bitmapMemory = VirtualAlloc(0, bitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
     buffer.pitch = width*buffer.bytesPerPixel;
-    renderWeirdGradient(buffer);
+    render(buffer);
 }
 
 void displayBuffer(offscreenBuffer &buffer, HDC deviceContext, int x, int y, int width, int height){
@@ -123,9 +128,17 @@ LRESULT CALLBACK mainWindowCallback(HWND window, UINT message, WPARAM wParam, LP
     return result;
 }
 
+void initializeScene() {
+    Sphere sphere = Sphere(1,Vector3f(0,0,-10));
+    Light light = Light(Vector3f(0,0,0));
+    scene.addObject(sphere);
+    scene.addLight(light);
+}
+
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
+    initializeScene();
     WNDCLASSA windowClass = {};
-    resizeDIBSection(backBuffer,1920,1080);
+    resizeDIBSection(backBuffer,192,108);
 
     windowClass.style = CS_HREDRAW|CS_VREDRAW;
     windowClass.lpfnWndProc = mainWindowCallback;
@@ -144,6 +157,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         if(windowHandle){
             // need to take messages off the queue -> loop through messages
             running = true;
+            render(backBuffer);
             while(running){
                 MSG message;
                 std::this_thread::sleep_for (std::chrono::milliseconds(100));
@@ -157,7 +171,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                 }
                 HDC deviceContext = GetDC(windowHandle);
                 windowDimension dim = getWindowDimension(windowHandle);
-                renderWeirdGradient(backBuffer);
                 displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
                 ReleaseDC(windowHandle,deviceContext);
             }

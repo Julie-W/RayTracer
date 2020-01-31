@@ -429,3 +429,18 @@ Matrix3f operator * ( const Matrix3f& x, const Matrix3f& y )
 
 	return product;
 }
+
+Matrix3f operator + ( const Matrix3f& x, const Matrix3f& y )
+{
+	Matrix3f addition; // zeroes
+
+	for( int i = 0; i < 3; ++i )
+	{
+		for( int j = 0; j < 3; ++j )
+		{
+			addition( i, j ) += x( i, j ) + y( i, j );
+		}
+	}
+
+	return addition;
+}
