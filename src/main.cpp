@@ -12,7 +12,6 @@
 #define global_variable static
 
 global_variable bool running;
-global_variable Scene scene;
 
 struct offscreenBuffer {
     BITMAPINFO bitmapInfo;
@@ -39,12 +38,20 @@ windowDimension getWindowDimension(HWND window){
 
 void render(offscreenBuffer &buffer){
     ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
+    Sphere sphere = Sphere(2,Vector3f(0,0,-10));
+    Plane floor = Plane(Vector3f(0,-2,0),Vector3f(1,-2,0),Vector3f(1,-2,1));
+    Light light = Light(Vector3f(100,0,-10));
+    Scene scene = Scene();
+    scene.addObject(&sphere);
+    scene.addObject(&floor);
+    scene.addLight(light);
+    viewPlane.setScene(&scene);
     UINT8 *row = (UINT8 *)buffer.bitmapMemory;
     int offset = 0;
     for(int y = 0; y < buffer.height; y++){
         UINT32 *pixel = (UINT32 *)row;
         for(int x = 0; x < buffer.width; x++){
-            Vector3f color = viewPlane.getPixelColor(x,y,scene);
+            Vector3f color = viewPlane.getPixelColor(x,y);
             // Pixel in memory: bb gg rr xx
             UINT8 blue = color[2];
             UINT8 green = color[1];
@@ -128,15 +135,7 @@ LRESULT CALLBACK mainWindowCallback(HWND window, UINT message, WPARAM wParam, LP
     return result;
 }
 
-void initializeScene() {
-    Sphere sphere = Sphere(2,Vector3f(0,0,-10));
-    Light light = Light(Vector3f(100,0,-10));
-    scene.addObject(sphere);
-    scene.addLight(light);
-}
-
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
-    initializeScene();
     WNDCLASSA windowClass = {};
     resizeDIBSection(backBuffer,1920,1080);
 
@@ -163,7 +162,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                 std::this_thread::sleep_for (std::chrono::milliseconds(100));
                 BOOL messageResult = GetMessage(&message,0,0,0);
                 if(messageResult > 0){
-                    std::cout << "print" << std::endl;
                     TranslateMessage(&message);
                     DispatchMessageA(&message);
                 } else {

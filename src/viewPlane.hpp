@@ -9,7 +9,9 @@ private:
     int height;
     float fovx;
     float fovy;
+    Scene *scene;
 public:
     ViewPlane(int, int, int, int);
-    Vector3f getPixelColor(int, int, Scene);
+    void setScene(Scene*);
+    Vector3f getPixelColor(int, int);
 };

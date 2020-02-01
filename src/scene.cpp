@@ -8,7 +8,7 @@ void Scene::setTransformation(Matrix4f mat){
     transf = mat;
 }
 
-void Scene::addObject(Sphere &obj){
+void Scene::addObject(Object *obj){
     objects.push_back(obj);
 }
 
@@ -21,13 +21,13 @@ Vector3f Scene::getColor(Ray &ray){
     HitPoint hitPoint;
     for (int i = 0; i < objects.size(); i++)
     {
-        HitPoint newHit = objects[i].shootRay(ray);
-        if ((newHit.distance < hitPoint.distance) || hitPoint.distance < 0){
+        Object* pobj = objects[i];
+        HitPoint newHit = pobj->shootRay(ray);
+        if(newHit.isHit && (!hitPoint.isHit || newHit.distance < hitPoint.distance)){
             hitPoint = newHit;
         }
     }
-    if (hitPoint.distance > 0){
-        std::cout << "Here" << std::endl;
+    if (hitPoint.isHit){
         color = getLighting(hitPoint);
     }
     return color;
@@ -43,8 +43,8 @@ Vector3f Scene::getLighting(HitPoint &hitPoint){
         Ray lightRay = Ray(hitPoint.point,lights[i].getPosition());
         for (int j = 0; j < objects.size(); j++)
         {
-            distance = objects[j].shootRay(lightRay).distance;
-            if (distance > 0){
+            HitPoint lightHit = objects[j]->shootRay(lightRay); 
+            if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i].getPosition()-hitPoint.point)).abs()){
                 isHit = true;
                 break;
             }

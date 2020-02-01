@@ -3,6 +3,7 @@
 
 struct HitPoint {
     float distance = -1;
+    bool isHit = false;
     Vector3f point;
 };
 

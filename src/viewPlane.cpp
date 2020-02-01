@@ -10,14 +10,15 @@ ViewPlane::ViewPlane(int d, int w, int h, int xangle){
     fovy = xangle * pi * ((float)h / (float)w) / 180;
 }
 
-Vector3f ViewPlane::getPixelColor(int x, int y, Scene scene){
+void ViewPlane::setScene(Scene* sc){
+    scene = sc;
+}
+
+Vector3f ViewPlane::getPixelColor(int x, int y){
     Vector3f direction;
     float xCoord = distance * (float)tan(fovx/2)*((x-width/2.0)/(width/2.0));
     float yCoord = distance * (float)tan(fovy/2)*((height/2.0-y)/(height/2.0));
-    if(xCoord > 0){
-        std::cout << "some" << std::endl;
-    }
     direction = Vector3f(xCoord,yCoord,-distance);
     Ray ray = Ray(direction);  
-    return scene.getColor(ray);
+    return scene->getColor(ray);
 }

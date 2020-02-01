@@ -10,13 +10,13 @@
 class Scene {
 private:
     Matrix4f transf;
-    std::vector<Sphere> objects;
+    std::vector<Object*> objects;
     std::vector<Light> lights;
     Vector3f getLighting(HitPoint&);
 public:
     Scene ();
     void setTransformation (Matrix4f);
-    void addObject(Sphere&);
+    void addObject(Object*);
     void addLight(Light&);
     Vector3f getColor(Ray&);
 };
