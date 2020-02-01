@@ -35,16 +35,22 @@ Vector3f Scene::getColor(Ray &ray){
 
 Vector3f Scene::getLighting(HitPoint &hitPoint){
     Vector3f color = Vector3f(0);
+    float distance;
+    bool isHit;
     for (int i = 0; i < lights.size(); i++)
     {
+        isHit = false;
         Ray lightRay = Ray(hitPoint.point,lights[i].getPosition());
         for (int j = 0; j < objects.size(); j++)
         {
-            HitPoint newHit = objects[j].shootRay(lightRay);
-            if (objects[j].shootRay(lightRay).distance <= 0){
-                color = color + Vector3f(255,0,0);
+            distance = objects[j].shootRay(lightRay).distance;
+            if (distance > 0){
+                isHit = true;
                 break;
-            } 
+            }
+        }
+        if (!isHit) {
+            color = color + Vector3f(255,0,0);
         }
     }
     return color;

@@ -9,6 +9,6 @@ private:
     Matrix4f transf;
 public:
     Sphere (int, Vector3f);
-    void setTransformation (Matrix4f);
+    void setTransformation(Matrix4f);
     HitPoint shootRay (Ray&);
 };

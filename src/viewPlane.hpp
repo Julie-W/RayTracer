@@ -10,6 +10,6 @@ private:
     float fovx;
     float fovy;
 public:
-    ViewPlane(int, int, int, int, int);
+    ViewPlane(int, int, int, int);
     Vector3f getPixelColor(int, int, Scene);
 };

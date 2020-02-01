@@ -3,6 +3,7 @@
 #include <vecmath.h>
 #include <iostream>
 #include "sphere.hpp"
+#include "plane.hpp"
 #include "light.hpp"
 #include "ray.hpp"
 

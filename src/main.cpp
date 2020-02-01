@@ -38,7 +38,7 @@ windowDimension getWindowDimension(HWND window){
 }
 
 void render(offscreenBuffer &buffer){
-    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90, 90);
+    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
     UINT8 *row = (UINT8 *)buffer.bitmapMemory;
     int offset = 0;
     for(int y = 0; y < buffer.height; y++){
@@ -129,8 +129,8 @@ LRESULT CALLBACK mainWindowCallback(HWND window, UINT message, WPARAM wParam, LP
 }
 
 void initializeScene() {
-    Sphere sphere = Sphere(1,Vector3f(0,0,-10));
-    Light light = Light(Vector3f(0,0,0));
+    Sphere sphere = Sphere(2,Vector3f(0,0,-10));
+    Light light = Light(Vector3f(100,0,-10));
     scene.addObject(sphere);
     scene.addLight(light);
 }
@@ -138,7 +138,7 @@ void initializeScene() {
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
     initializeScene();
     WNDCLASSA windowClass = {};
-    resizeDIBSection(backBuffer,192,108);
+    resizeDIBSection(backBuffer,1920,1080);
 
     windowClass.style = CS_HREDRAW|CS_VREDRAW;
     windowClass.lpfnWndProc = mainWindowCallback;
@@ -148,7 +148,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         HWND windowHandle = CreateWindowExA(
             0, windowClass.lpszClassName,
             "HandmaidsTale",
-            WS_OVERLAPPEDWINDOW|WS_VISIBLE|WS_MAXIMIZE,
+            WS_OVERLAPPEDWINDOW|WS_VISIBLE,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
             CW_USEDEFAULT,

@@ -1,13 +1,14 @@
 #include "ray.hpp"
+#include <algorithm>
 
 Ray::Ray(Vector3f dir){
     direction = dir.normalized();
     start = Vector3f(0);
 }
 
-Ray::Ray(Vector3f start, Vector3f end){
-    direction = (end-start).normalized();
-    start = start;
+Ray::Ray(Vector3f v1, Vector3f v2){
+    direction = (v2-v1).normalized();
+    start = v1;
 }
 
 Vector3f Ray::getDirection(){
