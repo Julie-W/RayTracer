@@ -62,6 +62,7 @@
         "xtr1common": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "variant": "cpp"
     }
 }

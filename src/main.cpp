@@ -36,6 +36,22 @@ windowDimension getWindowDimension(HWND window){
     return result;
 }
 
+void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int xPixelsPerBlock, int yBlock, int yPixelsPerBlock){
+    int xStart = xBlock*xPixelsPerBlock;
+    int yStart = yBlock*yPixelsPerBlock;
+    for(int y = yStart; y < yStart + yPixelsPerBlock; y++){
+        for(int x = xStart; x < xStart + xPixelsPerBlock; x++){
+            UINT32 *pixel = (UINT32 *)(buffer.bitmapMemory) + y*buffer.width + x;
+            Vector3f color = viewPlane.getPixelColor(x,y); 
+            // Pixel in memory: bb gg rr xx
+            UINT8 blue = color[2];
+            UINT8 green = color[1];
+            UINT8 red = color[0];
+            *pixel = (red << 16) | (green << 8) | blue;
+        }
+    }
+}
+
 void render(offscreenBuffer &buffer){
     ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
     Sphere sphere = Sphere(2,Vector3f(0,0,-10));
@@ -46,22 +62,19 @@ void render(offscreenBuffer &buffer){
     scene.addObject(&floor);
     scene.addLight(light);
     viewPlane.setScene(&scene);
-    UINT8 *row = (UINT8 *)buffer.bitmapMemory;
-    int offset = 0;
-    for(int y = 0; y < buffer.height; y++){
-        UINT32 *pixel = (UINT32 *)row;
-        for(int x = 0; x < buffer.width; x++){
-            Vector3f color = viewPlane.getPixelColor(x,y);
-            // Pixel in memory: bb gg rr xx
-            UINT8 blue = color[2];
-            UINT8 green = color[1];
-            UINT8 red = color[0];
-            *pixel = (red << 16) | (green << 8) | blue;
-            pixel++;
+    int xPixelsPerBlock = buffer.width / 4;
+    int yPixelsPerBlock = buffer.height / 4;
+    std::vector<std::thread> threads;
+    for(int blockY = 0; blockY < 4; blockY++){
+        for(int blockX = 0; blockX < 4; blockX++){
+            threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
         }
-        row += buffer.pitch;
     }
-
+    for (std::thread & t : threads){
+        if (t.joinable())
+            t.join();
+        }
+    
 }
 
 void resizeDIBSection(offscreenBuffer &buffer, int width, int height){
@@ -176,4 +189,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     }
 
     return 0;
+}
+
+int main() {
+    return WinMain(GetModuleHandle(NULL), NULL, GetCommandLineA(), SW_SHOWNORMAL);
 }
