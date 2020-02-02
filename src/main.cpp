@@ -36,6 +36,14 @@ windowDimension getWindowDimension(HWND window){
     return result;
 }
 
+void displayBuffer(offscreenBuffer &buffer, HDC deviceContext, int x, int y, int width, int height){
+    StretchDIBits(deviceContext, 
+        0 ,0, width, height,
+        0 ,0, buffer.width, buffer.height,
+        buffer.bitmapMemory, &buffer.bitmapInfo,
+        DIB_RGB_COLORS, SRCCOPY);
+}
+
 void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int xPixelsPerBlock, int yBlock, int yPixelsPerBlock){
     int xStart = xBlock*xPixelsPerBlock;
     int yStart = yBlock*yPixelsPerBlock;
@@ -44,19 +52,19 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
             UINT32 *pixel = (UINT32 *)(buffer.bitmapMemory) + y*buffer.width + x;
             Vector3f color = viewPlane.getPixelColor(x,y); 
             // Pixel in memory: bb gg rr xx
-            UINT8 blue = color[2];
-            UINT8 green = color[1];
-            UINT8 red = color[0];
+            UINT8 blue = color[2]*255 > 255? 255 : color[2]*255;
+            UINT8 green = color[1]*255 > 255? 255 : color[1]*255;
+            UINT8 red = color[0]*255 > 255? 255 : color[0]*255;
             *pixel = (red << 16) | (green << 8) | blue;
         }
     }
 }
 
-void render(offscreenBuffer &buffer){
+void render(offscreenBuffer &buffer, HWND windowHandle){
     ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
-    Sphere sphere = Sphere(2,Vector3f(0,0,-10));
-    Plane floor = Plane(Vector3f(0,-2,0),Vector3f(1,-2,0),Vector3f(1,-2,1));
-    Light light = Light(Vector3f(100,0,-10));
+    Sphere sphere = Sphere(2,Vector3f(0,0,-10),Vector3f(1,0,0));
+    Plane floor = Plane(Vector3f(0,-3,0),Vector3f(1,-3,0),Vector3f(1,-3,1),Vector3f(0,0,1));
+    Light light = Light(Vector3f(5,0,-5));
     Scene scene = Scene();
     scene.addObject(&sphere);
     scene.addObject(&floor);
@@ -67,13 +75,18 @@ void render(offscreenBuffer &buffer){
     std::vector<std::thread> threads;
     for(int blockY = 0; blockY < 4; blockY++){
         for(int blockX = 0; blockX < 4; blockX++){
+            //renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
             threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
         }
     }
+    HDC deviceContext = GetDC(windowHandle);
+    windowDimension dim = getWindowDimension(windowHandle);
     for (std::thread & t : threads){
-        if (t.joinable())
+        if (t.joinable()) {
             t.join();
+            displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
         }
+    }
     
 }
 
@@ -93,15 +106,6 @@ void resizeDIBSection(offscreenBuffer &buffer, int width, int height){
     int bitmapMemorySize = buffer.bytesPerPixel*width*height;
     buffer.bitmapMemory = VirtualAlloc(0, bitmapMemorySize, MEM_COMMIT, PAGE_READWRITE);
     buffer.pitch = width*buffer.bytesPerPixel;
-    render(buffer);
-}
-
-void displayBuffer(offscreenBuffer &buffer, HDC deviceContext, int x, int y, int width, int height){
-    StretchDIBits(deviceContext, 
-        0 ,0, width, height,
-        0 ,0, buffer.width, buffer.height,
-        buffer.bitmapMemory, &buffer.bitmapInfo,
-        DIB_RGB_COLORS, SRCCOPY);
 }
 
 LRESULT CALLBACK mainWindowCallback(HWND window, UINT message, WPARAM wParam, LPARAM lParam) //WindowProc
@@ -150,7 +154,7 @@ LRESULT CALLBACK mainWindowCallback(HWND window, UINT message, WPARAM wParam, LP
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
     WNDCLASSA windowClass = {};
-    resizeDIBSection(backBuffer,1920,1080);
+    resizeDIBSection(backBuffer,960,540);//1920,1080);
 
     windowClass.style = CS_HREDRAW|CS_VREDRAW;
     windowClass.lpfnWndProc = mainWindowCallback;
@@ -169,7 +173,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         if(windowHandle){
             // need to take messages off the queue -> loop through messages
             running = true;
-            render(backBuffer);
+            render(backBuffer,windowHandle);
             while(running){
                 MSG message;
                 std::this_thread::sleep_for (std::chrono::milliseconds(100));

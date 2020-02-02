@@ -13,6 +13,7 @@ private:
     std::vector<Object*> objects;
     std::vector<Light> lights;
     Vector3f getLighting(HitPoint&);
+    Vector3f lightObject(HitPoint&);
 public:
     Scene ();
     void setTransformation (Matrix4f);

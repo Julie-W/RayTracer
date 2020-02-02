@@ -2,9 +2,10 @@
 #include "sphere.hpp"
 static float eps = 0.001;
 
-Sphere::Sphere(int r, Vector3f p) {
+Sphere::Sphere(int r, Vector3f p, Vector3f col) {
     radius = r;
     middle = p;
+    color = col;
 }
 
 HitPoint Sphere::shootRay(Ray &ray) {
@@ -29,5 +30,7 @@ HitPoint Sphere::shootRay(Ray &ray) {
         }
     }
     hitPoint.point = hitPoint.distance * ray.getDirection();
+    hitPoint.color = color;
+    hitPoint.normal = (hitPoint.point - middle).normalized();
     return hitPoint;
 }

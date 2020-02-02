@@ -5,6 +5,8 @@ struct HitPoint {
     float distance = -1;
     bool isHit = false;
     Vector3f point;
+    Vector3f normal;
+    Vector3f color = Vector3f(0,0,0);
 };
 
 class Ray {
