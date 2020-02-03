@@ -7,6 +7,11 @@ Light::Light(Vector3f pos){
     position = pos;
 }
 
+Light::Light(Vector3f pos, Vector3f col){
+    position = pos;
+    color = col;
+}
+
 void Light::setTransformation(Matrix4f mat){
     transf = mat;
 }

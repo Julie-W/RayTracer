@@ -17,6 +17,10 @@ void Scene::addLight(Light &light){
     lights.push_back(light);
 }
 
+void Scene::addAmbient(Vector3f light){
+    ambient = light;
+}
+
 Vector3f Scene::getColor(Ray &ray){
     Vector3f color;
     HitPoint hitPoint;

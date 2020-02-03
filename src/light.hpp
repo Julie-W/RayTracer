@@ -9,6 +9,7 @@ private:
     Vector3f color = Vector3f(1,1,1);
 public:
     Light (Vector3f);
+    Light (Vector3f, Vector3f);
     void setTransformation (Matrix4f);
     Vector3f getPosition();
     Vector3f lightObject(HitPoint&);

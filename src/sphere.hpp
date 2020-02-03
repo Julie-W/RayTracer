@@ -11,5 +11,5 @@ private:
     Matrix4f transf;
 public:
     Sphere (int, Vector3f, Vector3f);
-    virtual HitPoint shootRay (Ray&);
+    HitPoint shootRay (Ray&);
 };

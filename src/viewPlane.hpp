@@ -9,7 +9,7 @@ private:
     int height;
     float fovx;
     float fovy;
-    Scene *scene;
+    Scene* scene;
 public:
     ViewPlane(int, int, int, int);
     void setScene(Scene*);

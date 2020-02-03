@@ -10,7 +10,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bazel-out/x64_windows-dbg/bin/main.exe",
-            "args": ["${workspaceFolder}/demo.txt","${workspaceFolder}/input.txt"],
+            "args": ["${workspaceFolder}/sphere.txt"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

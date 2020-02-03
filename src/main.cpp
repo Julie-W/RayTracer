@@ -3,9 +3,11 @@
 #include <dsound.h>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <thread>
 #include "scene.hpp"
 #include "viewPlane.hpp"
+#include "readfile.h"
 
 #define internal static
 #define local_persist static
@@ -60,15 +62,10 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
     }
 }
 
-void render(offscreenBuffer &buffer, HWND windowHandle){
+void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
-    Sphere sphere = Sphere(2,Vector3f(0,0,-10),Vector3f(1,0,0));
-    Plane floor = Plane(Vector3f(0,-3,0),Vector3f(1,-3,0),Vector3f(1,-3,1),Vector3f(0,0,1));
-    Light light = Light(Vector3f(5,0,-5));
     Scene scene = Scene();
-    scene.addObject(&sphere);
-    scene.addObject(&floor);
-    scene.addLight(light);
+    readfile(filename, &scene);
     viewPlane.setScene(&scene);
     int xPixelsPerBlock = buffer.width / 4;
     int yPixelsPerBlock = buffer.height / 4;
@@ -153,6 +150,12 @@ LRESULT CALLBACK mainWindowCallback(HWND window, UINT message, WPARAM wParam, LP
 }
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd){
+    std::string str = lpCmdLine;
+    std::stringstream ss (str);
+    std::string a;
+    char filename[20]; ss >> a >> filename;
+    std::cout << filename << std::endl;
+    const char* fn = filename;
     WNDCLASSA windowClass = {};
     resizeDIBSection(backBuffer,960,540);//1920,1080);
 
@@ -173,7 +176,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         if(windowHandle){
             // need to take messages off the queue -> loop through messages
             running = true;
-            render(backBuffer,windowHandle);
+            render(backBuffer,windowHandle, fn);
             while(running){
                 MSG message;
                 std::this_thread::sleep_for (std::chrono::milliseconds(100));
