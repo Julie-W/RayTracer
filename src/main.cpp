@@ -72,8 +72,8 @@ void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::vector<std::thread> threads;
     for(int blockY = 0; blockY < 4; blockY++){
         for(int blockX = 0; blockX < 4; blockX++){
-            //renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
-            threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
+            renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
+            //threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
         }
     }
     HDC deviceContext = GetDC(windowHandle);
@@ -179,7 +179,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
             render(backBuffer,windowHandle, fn);
             while(running){
                 MSG message;
-                std::this_thread::sleep_for (std::chrono::milliseconds(100));
                 BOOL messageResult = GetMessage(&message,0,0,0);
                 if(messageResult > 0){
                     TranslateMessage(&message);
@@ -191,6 +190,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                 windowDimension dim = getWindowDimension(windowHandle);
                 displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
                 ReleaseDC(windowHandle,deviceContext);
+                std::this_thread::sleep_for (std::chrono::milliseconds(100));
             }
         }
     }

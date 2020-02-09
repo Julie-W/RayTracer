@@ -4,6 +4,7 @@
 #include <iostream>
 #include "sphere.hpp"
 #include "plane.hpp"
+#include "triangle.hpp"
 #include "light.hpp"
 #include "ray.hpp"
 

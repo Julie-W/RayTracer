@@ -1,5 +1,6 @@
 #pragma once
 #include <vecmath.h>
+#include "ray.hpp"
 
 class Object {
 private:

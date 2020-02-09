@@ -84,6 +84,14 @@ void readfile(const char* filename, Scene* scene) {
                         scene->addObject(plane);
                     }
                 }
+                else if (cmd == "triangle") {
+                    validinput = readvals(s, 12, values); 
+                    if (validinput) {
+                        Triangle *triangle = new Triangle(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]),
+                            Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]));
+                        scene->addObject(triangle);
+                    }
+                }
                 else {
                     std::cerr << "Unknown Command: " << cmd << " Skipping \n"; 
                 }

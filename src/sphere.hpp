@@ -1,6 +1,5 @@
 #pragma once
 #include <vecmath.h>
-#include "ray.hpp"
 #include "object.hpp"
 
 class Sphere: public Object {
