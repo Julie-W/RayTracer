@@ -44,7 +44,7 @@ Vector3f Scene::getColor(Ray &ray){
 
 Vector3f Scene::getLighting(HitPoint &hitPoint){
     Vector3f color = Vector3f(0);
-    color = color + Vector3f(0.01); // ambient lighting
+    color = color + ambient;
     HitPoint lightHit;
     float distance;
     bool isHit;
@@ -54,7 +54,7 @@ Vector3f Scene::getLighting(HitPoint &hitPoint){
         Ray lightRay = Ray(hitPoint.point,lights[i].getPosition());
         for (int j = 0; j < objects.size(); j++)
         {
-            lightHit = objects[j]->shootRay(lightRay); 
+            lightHit = objects[j]->shootRay(lightRay, true); 
             if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i].getPosition()-hitPoint.point)).abs()){
                 isHit = true;
                 break;

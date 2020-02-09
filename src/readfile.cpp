@@ -6,13 +6,17 @@
 #include <stack>
 #include "readfile.h"
 
-bool readvals(std::stringstream &s,int numvals, float* values){
+bool readvals(std::stringstream &s,int numvals, float* values, std::string* filename){
     for (int i = 0; i < numvals; i++) {
         s >> values[i]; 
         if (s.fail()) {
             std::cout << "Failed reading value " << i << " will skip\n"; 
             return false;
         }
+    }
+    std::string x;
+    if (s >> x){
+        filename->assign(x);
     }
     return true; 
 }
@@ -31,7 +35,6 @@ void readfile(const char* filename, Scene* scene) {
                 s >> cmd; 
                 int i; 
                 float values[12]; // Position and color for light, colors for others
-                                    // Up to 10 params for cameras.  
                 bool validinput; // Validity of input 
                 if (cmd == "light") {
                     validinput = readvals(s, 6, values); // Position/color for lts.
@@ -39,9 +42,7 @@ void readfile(const char* filename, Scene* scene) {
                         Light light = Light(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]));
                         scene->addLight(light);
                     }
-                }
-
-                else if (cmd == "ambient") {
+                } else if (cmd == "ambient") {
                     validinput = readvals(s, 3, values); // colors 
                     if (validinput) {
                         scene->addAmbient(Vector3f(values[0],values[1],values[2]));
@@ -66,33 +67,37 @@ void readfile(const char* filename, Scene* scene) {
                     if (validinput) {
                         // shininess per object
                     }
-                }
-
-                else if (cmd == "sphere") {
+                } else if (cmd == "sphere") {
                     validinput = readvals(s, 7, values); 
                     if (validinput) {
                         Sphere *sphere = new Sphere(values[0],Vector3f(values[1],values[2],values[3]),Vector3f(values[4],values[5],values[6]));
                         scene->addObject(sphere);
                     }
-                }
-
-                else if (cmd == "plane") {
+                } else if (cmd == "plane") {
                     validinput = readvals(s, 12, values); 
                     if (validinput) {
                         Plane *plane = new Plane(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]),
                             Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]));
                         scene->addObject(plane);
                     }
-                }
-                else if (cmd == "triangle") {
+                } else if (cmd == "triangle") {
                     validinput = readvals(s, 12, values); 
                     if (validinput) {
                         Triangle *triangle = new Triangle(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]),
                             Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]));
                         scene->addObject(triangle);
                     }
-                }
-                else {
+                } else if (cmd == "mesh") {
+                    std::string filename;
+                    validinput = readvals(s, 4, values, &filename);
+                    if (validinput) {
+                        Mesh *mesh = new Mesh(Vector3f(values[1],values[2],values[3]));
+                        std::cout << filename << std::endl;
+                        readMesh(filename,mesh);
+                        mesh->addBoundingBox();
+                        scene->addObject(mesh);
+                    }
+                } else {
                     std::cerr << "Unknown Command: " << cmd << " Skipping \n"; 
                 }
             }
@@ -102,6 +107,50 @@ void readfile(const char* filename, Scene* scene) {
         std::cout << "Unable to Open Input Data File " << filename << "\n"; 
         std::cout << "Displaying default scene\n"; 
         initializeDefaultScene(scene);
+    }
+}
+
+void readMesh(std::string filename, Mesh* mesh){
+    std::vector<Vector3f> vecv;
+    std::vector<Vector3f> vecn;
+    std::ifstream infile(filename);
+    std::string line;
+    while (std::getline(infile, line)){
+        std::stringstream ss(line);
+        std::string type, v, n;
+        if (ss >> type) {
+            if (type == "f"){
+                Triangle *triangle;
+                std::vector<int> points;
+                while (ss >> v){
+                    for (int i = 0; i < v.length(); i++) {
+                        if(v[i]=='/') {
+                            points.push_back(std::stoi(n)); n="";
+                            break;
+                        } else {
+                            n += v[i];
+                        }
+                    }
+                }
+                try {
+                    triangle = new Triangle(vecv[points[0]-1],vecv[points[1]-1],vecv[points[2]-1]);
+                    mesh->addTriangle(triangle);
+                } catch(...) {
+                    std::cout << "out" << std::endl;
+                }
+                
+            } else {
+                std::string n1, n2, n3;
+                ss >> n1;
+                ss >> n2; 
+                ss >> n3;
+                if (type == "v") {
+                    vecv.push_back(Vector3f(std::stof(n1)*2,std::stof(n2)*2,std::stof(n3)*2-10));
+                } else if (type == "vn") {
+                    vecn.push_back(Vector3f(std::stof(n1),std::stof(n2),std::stof(n3)));
+                }
+            }
+        }
     }
 }
 

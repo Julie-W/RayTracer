@@ -10,5 +10,5 @@ private:
     Matrix4f transf;
 public:
     Sphere (int, Vector3f, Vector3f);
-    HitPoint shootRay (Ray&);
+    HitPoint shootRay (Ray&, bool isLight = false);
 };

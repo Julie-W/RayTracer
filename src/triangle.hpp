@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+#include <algorithm>
 #include "object.hpp"
 
 class Triangle : public Object {
@@ -7,9 +9,12 @@ private:
     Vector3f b;
     Vector3f c;
     Vector3f normal;
-    Vector3f color;
+    Vector3f color = Vector3f(1,1,1);
     Matrix4f transf;
 public:
+    Triangle(Vector3f, Vector3f, Vector3f);
     Triangle(Vector3f, Vector3f, Vector3f, Vector3f);
-    HitPoint shootRay (Ray&);
+    float getMinCoord(int);
+    float getMaxCoord(int);
+    HitPoint shootRay (Ray&, bool isLight = false);
 };

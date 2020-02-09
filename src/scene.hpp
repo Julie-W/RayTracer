@@ -5,6 +5,7 @@
 #include "sphere.hpp"
 #include "plane.hpp"
 #include "triangle.hpp"
+#include "mesh.hpp"
 #include "light.hpp"
 #include "ray.hpp"
 

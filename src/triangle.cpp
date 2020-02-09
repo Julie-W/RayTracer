@@ -1,13 +1,18 @@
 #include "triangle.hpp"
 static float eps = 0.001;
 
+Triangle::Triangle(Vector3f p1, Vector3f p2, Vector3f p3) {
+    a = p1; b = p2; c = p3;
+    normal = Vector3f::cross(p1-p2,p1-p3).normalized();
+}
+
 Triangle::Triangle(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f col) {
     a = p1; b = p2; c = p3;
     normal = Vector3f::cross(p1-p2,p1-p3).normalized();
     color = col;
 }
 
-HitPoint Triangle::shootRay(Ray &ray){
+HitPoint Triangle::shootRay(Ray &ray, bool isLight){
     HitPoint hitPoint = {};
     float top = Vector3f::dot(a-ray.getStart(),normal);
     float bottom = Vector3f::dot(ray.getDirection(),normal);
@@ -35,4 +40,12 @@ HitPoint Triangle::shootRay(Ray &ray){
     hitPoint.color = color;
     hitPoint.normal = normal;
     return hitPoint;
+}
+
+float Triangle::getMinCoord(int index){
+    return std::min(a[index],std::min(b[index],c[index]));
+}
+
+float Triangle::getMaxCoord(int index){
+    return std::max(a[index],std::max(b[index],c[index]));
 }

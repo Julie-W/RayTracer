@@ -72,8 +72,8 @@ void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::vector<std::thread> threads;
     for(int blockY = 0; blockY < 4; blockY++){
         for(int blockX = 0; blockX < 4; blockX++){
-            renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
-            //threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
+            //renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
+            threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
         }
     }
     HDC deviceContext = GetDC(windowHandle);
@@ -162,11 +162,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     windowClass.style = CS_HREDRAW|CS_VREDRAW;
     windowClass.lpfnWndProc = mainWindowCallback;
     windowClass.hInstance = hInstance; // can use GetModuleHandle
-    windowClass.lpszClassName = "HandmaidsTaleWindowClass";
+    windowClass.lpszClassName = "RayTracerWindowClass";
     if(RegisterClassA(&windowClass)){
         HWND windowHandle = CreateWindowExA(
             0, windowClass.lpszClassName,
-            "HandmaidsTale",
+            "RayTracer",
             WS_OVERLAPPEDWINDOW|WS_VISIBLE,
             CW_USEDEFAULT,
             CW_USEDEFAULT,

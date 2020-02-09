@@ -7,7 +7,7 @@ Plane::Plane(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f col) {
     color = col;
 }
 
-HitPoint Plane::shootRay(Ray &ray){
+HitPoint Plane::shootRay(Ray &ray, bool isLight){
     HitPoint hitPoint = {};
     float top = Vector3f::dot(a-ray.getStart(),normal);
     float bottom = Vector3f::dot(ray.getDirection(),normal);

@@ -8,7 +8,7 @@ Sphere::Sphere(int r, Vector3f p, Vector3f col) {
     color = col;
 }
 
-HitPoint Sphere::shootRay(Ray &ray) {
+HitPoint Sphere::shootRay(Ray &ray, bool isLight) {
     HitPoint hitPoint = {};
     float a = Vector3f::dot(ray.getDirection(),ray.getDirection());
     float b = 2 * Vector3f::dot(ray.getStart()-middle,ray.getDirection());

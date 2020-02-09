@@ -10,5 +10,5 @@ private:
     Vector3f color;
 public:
     Plane (Vector3f,Vector3f,Vector3f,Vector3f);
-    virtual HitPoint shootRay (Ray&);
+    virtual HitPoint shootRay (Ray&, bool isLight = false);
 };
