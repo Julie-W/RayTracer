@@ -37,7 +37,7 @@ Vector3f Scene::getColor(Ray &ray){
         if (Vector3f::dot(hitPoint.normal,ray.getDirection())>0.0001){
             hitPoint.normal = -1*hitPoint.normal;
         }
-        color = getLighting(hitPoint);
+        color = hitPoint.color; //getLighting(hitPoint);
     }
     return color;
 }
@@ -55,6 +55,7 @@ Vector3f Scene::getLighting(HitPoint &hitPoint){
         for (int j = 0; j < objects.size(); j++)
         {
             lightHit = objects[j]->shootRay(lightRay, true); 
+            // put this in ray intersection 
             if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i].getPosition()-hitPoint.point)).abs()){
                 isHit = true;
                 break;

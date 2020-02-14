@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <chrono>
 #include "scene.hpp"
 #include "viewPlane.hpp"
 #include "readfile.h"
@@ -63,6 +64,8 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
 }
 
 void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
     Scene scene = Scene();
     readfile(filename, &scene);
@@ -72,8 +75,11 @@ void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::vector<std::thread> threads;
     for(int blockY = 0; blockY < 4; blockY++){
         for(int blockX = 0; blockX < 4; blockX++){
-            //renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
-            threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
+            renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
+            HDC deviceContext = GetDC(windowHandle);
+            windowDimension dim = getWindowDimension(windowHandle);
+            displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
+            //threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
         }
     }
     HDC deviceContext = GetDC(windowHandle);
@@ -84,7 +90,8 @@ void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
             displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
         }
     }
-    
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    std::cout << "Render time = " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms" << std::endl;
 }
 
 void resizeDIBSection(offscreenBuffer &buffer, int width, int height){

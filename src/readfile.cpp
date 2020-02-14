@@ -134,6 +134,7 @@ void readMesh(std::string filename, Mesh* mesh){
                 }
                 try {
                     triangle = new Triangle(vecv[points[0]-1],vecv[points[1]-1],vecv[points[2]-1]);
+                    triangle->setVertexNormals(vecn[points[0]-1],vecn[points[1]-1],vecn[points[2]-1]);
                     mesh->addTriangle(triangle);
                 } catch(...) {
                     std::cout << "out" << std::endl;

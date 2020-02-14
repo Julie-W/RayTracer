@@ -22,21 +22,12 @@ void Mesh::addTriangle(Triangle *triangle){
 
 void Mesh::addBoundingBox(){
     boundingBox.setPoints(x0,x1,y0,y1,z0,z1);
-    boundingBox.divideBoundingBox(triangles);
+    boundingBox.setTriangles(triangles);
+    boundingBox.divideBoundingBox(3);
 }
 
 HitPoint Mesh::shootRay(Ray &ray, bool isLight){
-    HitPoint hitPoint;
-    if (boundingBox.shootRay(ray).isHit){
-        for (int i = 0; i < triangles.size(); i++){
-            HitPoint newHit = triangles[i]->shootRay(ray);
-            if(newHit.isHit && (!hitPoint.isHit || newHit.distance < hitPoint.distance)){
-                hitPoint = newHit;
-                if(isLight){
-                    break;
-                }
-            }
-        }
-    }
+    HitPoint hitPoint = boundingBox.shootRay(ray, isLight);
+    //hitPoint.color = color;
     return hitPoint;
 }
