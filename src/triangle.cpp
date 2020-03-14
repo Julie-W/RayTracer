@@ -17,9 +17,9 @@ Triangle::Triangle(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f col) {
 }
 
 void Triangle::setVertexNormals(Vector3f n1, Vector3f n2, Vector3f n3){
-    vNormals.push_back(n1);
-    vNormals.push_back(n2);
-    vNormals.push_back(n3);
+    vNormals.push_back(n1.normalized());
+    vNormals.push_back(n2.normalized());
+    vNormals.push_back(n3.normalized());
 }
 
 HitPoint Triangle::shootRay(Ray &ray, bool isLight){

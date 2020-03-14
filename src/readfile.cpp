@@ -89,11 +89,12 @@ void readfile(const char* filename, Scene* scene) {
                     }
                 } else if (cmd == "mesh") {
                     std::string filename;
-                    validinput = readvals(s, 4, values, &filename);
+                    validinput = readvals(s, 7, values, &filename);
                     if (validinput) {
-                        Mesh *mesh = new Mesh(Vector3f(values[1],values[2],values[3]));
-                        std::cout << filename << std::endl;
-                        readMesh(filename,mesh);
+                        float size = values[0];
+                        Vector3f middle = Vector3f(values[1],values[2],values[3]);
+                        Mesh *mesh = new Mesh(Vector3f(values[4],values[5],values[6]));
+                        readMesh(filename,mesh,size,middle);
                         mesh->addBoundingBox();
                         scene->addObject(mesh);
                     }
@@ -110,7 +111,7 @@ void readfile(const char* filename, Scene* scene) {
     }
 }
 
-void readMesh(std::string filename, Mesh* mesh){
+void readMesh(std::string filename, Mesh* mesh, float size, Vector3f middle){
     std::vector<Vector3f> vecv;
     std::vector<Vector3f> vecn;
     std::ifstream infile(filename);
@@ -146,7 +147,7 @@ void readMesh(std::string filename, Mesh* mesh){
                 ss >> n2; 
                 ss >> n3;
                 if (type == "v") {
-                    vecv.push_back(Vector3f(std::stof(n1)*2,std::stof(n2)*2,std::stof(n3)*2-10));
+                    vecv.push_back(Vector3f(std::stof(n1)*size,std::stof(n2)*size,std::stof(n3)*size)+middle);
                 } else if (type == "vn") {
                     vecn.push_back(Vector3f(std::stof(n1),std::stof(n2),std::stof(n3)));
                 }

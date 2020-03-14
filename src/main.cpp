@@ -40,18 +40,19 @@ windowDimension getWindowDimension(HWND window){
 }
 
 void displayBuffer(offscreenBuffer &buffer, HDC deviceContext, int x, int y, int width, int height){
-    StretchDIBits(deviceContext, 
+    SetDIBits(deviceContext)
+    /* StretchDIBits(deviceContext, 
         0 ,0, width, height,
         0 ,0, buffer.width, buffer.height,
         buffer.bitmapMemory, &buffer.bitmapInfo,
-        DIB_RGB_COLORS, SRCCOPY);
+        DIB_RGB_COLORS, SRCCOPY); */
 }
 
-void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int xPixelsPerBlock, int yBlock, int yPixelsPerBlock){
-    int xStart = xBlock*xPixelsPerBlock;
-    int yStart = yBlock*yPixelsPerBlock;
-    for(int y = yStart; y < yStart + yPixelsPerBlock; y++){
-        for(int x = xStart; x < xStart + xPixelsPerBlock; x++){
+void renderBlock(HWND windowHandle, offscreenBuffer &buffer, ViewPlane &viewPlane, int xStart, int xEnd, int yStart, int yEnd){
+    //HDC deviceContext = GetDC(windowHandle);
+    std::cout << xStart << " - " << xEnd << " , " << yStart << " - " << yEnd << std::endl;
+    for(int y = yStart; y < yEnd; y++){
+        for(int x = xStart; x < xEnd; x++){
             UINT32 *pixel = (UINT32 *)(buffer.bitmapMemory) + y*buffer.width + x;
             Vector3f color = viewPlane.getPixelColor(x,y); 
             // Pixel in memory: bb gg rr xx
@@ -59,6 +60,7 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
             UINT8 green = color[1]*255 > 255? 255 : color[1]*255;
             UINT8 red = color[0]*255 > 255? 255 : color[0]*255;
             *pixel = (red << 16) | (green << 8) | blue;
+            //SetPixel(deviceContext,x,y,RGB(red,green,blue));
         }
     }
 }
@@ -66,24 +68,28 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
 void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
+    HDC deviceContext = GetDC(windowHandle);
+    windowDimension dim = getWindowDimension(windowHandle);
+    ViewPlane viewPlane = ViewPlane(1, dim.width, dim.height, 90);
     Scene scene = Scene();
     readfile(filename, &scene);
     viewPlane.setScene(&scene);
-    int xPixelsPerBlock = buffer.width / 4;
-    int yPixelsPerBlock = buffer.height / 4;
+    int xPixelsPerBlock = dim.width / 4;
+    int yPixelsPerBlock = dim.height / 4;
+    std::cout << dim.width << std::endl;
+    std::cout << dim.height << std::endl;
     std::vector<std::thread> threads;
-    for(int blockY = 0; blockY < 4; blockY++){
-        for(int blockX = 0; blockX < 4; blockX++){
-            renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
-            HDC deviceContext = GetDC(windowHandle);
-            windowDimension dim = getWindowDimension(windowHandle);
+    for(int blockY = 0; blockY < 5; blockY++){
+        int yStart = blockY * yPixelsPerBlock;
+        int yEnd = ((blockY+1)*yPixelsPerBlock < dim.height)? (blockY+1)*yPixelsPerBlock : dim.height;
+        for(int blockX = 0; blockX < 5; blockX++){
+            int xStart = blockX * xPixelsPerBlock;
+            int xEnd = ((blockX+1)*xPixelsPerBlock < dim.width)? (blockX+1)*xPixelsPerBlock : dim.width;
+            //renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
             displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
-            //threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
+            threads.push_back(std::thread(renderBlock,windowHandle,std::ref(buffer),std::ref(viewPlane),xStart,xEnd,yStart,yEnd));
         }
     }
-    HDC deviceContext = GetDC(windowHandle);
-    windowDimension dim = getWindowDimension(windowHandle);
     for (std::thread & t : threads){
         if (t.joinable()) {
             t.join();
@@ -161,7 +167,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     std::stringstream ss (str);
     std::string a;
     char filename[20]; ss >> a >> filename;
-    std::cout << filename << std::endl;
     const char* fn = filename;
     WNDCLASSA windowClass = {};
     resizeDIBSection(backBuffer,960,540);//1920,1080);

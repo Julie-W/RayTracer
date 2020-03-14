@@ -10,8 +10,6 @@ BoundingBox::BoundingBox(float numx0, float numx1, float numy0, float numy1, flo
     y1 = numy1;
     z0 = numz0;
     z1 = numz1;
-    color = Vector3f(rand() / (RAND_MAX + 1.),rand() / (RAND_MAX + 1.),rand() / (RAND_MAX + 1.));
-    color.print();
 }
 
 void BoundingBox::setPoints(float numx0, float numx1, float numy0, float numy1, float numz0, float numz1){
@@ -44,7 +42,6 @@ void BoundingBox::divideBoundingBox(int level){
             }
         }
     }
-    //std::cout << triangles.size() << std::endl;
     for (int i = 0; i < triangles.size(); i++){
         for (int j = 0; j < children.size(); j++){
             if (children[j]->isIn(triangles[i]->getVertex(0)) || children[j]->isIn(triangles[i]->getVertex(1)) || children[j]->isIn(triangles[i]->getVertex(2))){
@@ -74,24 +71,19 @@ HitPoint BoundingBox::shootRay(Ray &ray, bool isLight){
     if (bbHit.isHit){
         if (children.size() > 0){
             hitPoint = {};
-            float distance = 0.0;
             for (int i = 0; i < children.size(); i++){
                 HitPoint newHit = children[i]->shootRay(ray, isLight);
-                distance = std::max(newHit.distance,distance);
                 if(newHit.isHit && (!hitPoint.isHit || (eps < newHit.distance && newHit.distance < hitPoint.distance))){
                     hitPoint = newHit;
                     if(isLight){
                         break;
                     }
                 }
-                hitPoint.distance = distance;
             }
         } else {
             hitPoint = {};
-            /* float distance = 0.0;
             for (int i = 0; i < triangles.size(); i++){
                 HitPoint newHit = triangles[i]->shootRay(ray);
-                distance = std::max(newHit.distance,distance);
                 if(newHit.isHit && (!hitPoint.isHit || newHit.distance < hitPoint.distance)){
                     hitPoint = newHit;
                     if(isLight){
@@ -99,10 +91,6 @@ HitPoint BoundingBox::shootRay(Ray &ray, bool isLight){
                     }
                 }
             }
-            hitPoint.isHit = true;
-            hitPoint.distance = distance; */
-            hitPoint = bbHit;
-            hitPoint.color = color;
         }
     }
     return hitPoint;

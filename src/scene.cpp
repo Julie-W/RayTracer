@@ -37,7 +37,7 @@ Vector3f Scene::getColor(Ray &ray){
         if (Vector3f::dot(hitPoint.normal,ray.getDirection())>0.0001){
             hitPoint.normal = -1*hitPoint.normal;
         }
-        color = hitPoint.color; //getLighting(hitPoint);
+        color = getLighting(hitPoint);
     }
     return color;
 }
