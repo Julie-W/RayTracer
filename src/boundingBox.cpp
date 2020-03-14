@@ -69,19 +69,26 @@ HitPoint BoundingBox::shootRay(Ray &ray, bool isLight){
     HitPoint hitPoint;
     HitPoint bbHit = isHit(ray);
     if (bbHit.isHit){
+        hitPoint = bbHit;
+        hitPoint.color = 0.1 * color;
         if (children.size() > 0){
-            hitPoint = {};
+            //hhitPoint = {};
+            float distance = 0.0;
             for (int i = 0; i < children.size(); i++){
                 HitPoint newHit = children[i]->shootRay(ray, isLight);
-                if(newHit.isHit && (!hitPoint.isHit || (eps < newHit.distance && newHit.distance < hitPoint.distance))){
+                distance = std::max(newHit.distance,distance);
+                if(newHit.isHit) hitPoint.color = hitPoint.color + newHit.color;
+                /* if(newHit.isHit && (!hitPoint.isHit || (eps < newHit.distance && newHit.distance < hitPoint.distance))){
                     hitPoint = newHit;
                     if(isLight){
                         break;
                     }
-                }
+                } */
+                //hitPoint.distance = distance;
             }
-        } else {
-            hitPoint = {};
+        } /* else {
+            hitPoint = {}; */
+            /* float distance = 0.0;
             for (int i = 0; i < triangles.size(); i++){
                 HitPoint newHit = triangles[i]->shootRay(ray);
                 if(newHit.isHit && (!hitPoint.isHit || newHit.distance < hitPoint.distance)){
@@ -91,7 +98,11 @@ HitPoint BoundingBox::shootRay(Ray &ray, bool isLight){
                     }
                 }
             }
-        }
+            hitPoint.isHit = true;
+            hitPoint.distance = distance; */
+/*             hitPoint = bbHit;
+            hitPoint.color = color;
+        } */
     }
     return hitPoint;
 }
