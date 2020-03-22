@@ -16,7 +16,7 @@ public:
     Triangle(Vector3f, Vector3f, Vector3f, Vector3f);
     void setVertexNormals(Vector3f, Vector3f, Vector3f);
     Vector3f getVertex(int);
-    float getMinCoord(int);
     float getMaxCoord(int);
+    float getMinCoord(int);
     HitPoint shootRay (Ray&, bool isLight = false);
 };

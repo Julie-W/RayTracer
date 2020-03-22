@@ -1,5 +1,6 @@
 #include "boundingBox.hpp"
 #include <iostream>
+#include<tuple>
 #include <algorithm>
 static float eps = 0.001;
 
@@ -10,8 +11,6 @@ BoundingBox::BoundingBox(float numx0, float numx1, float numy0, float numy1, flo
     y1 = numy1;
     z0 = numz0;
     z1 = numz1;
-    color = Vector3f(rand() / (RAND_MAX + 1.),rand() / (RAND_MAX + 1.),rand() / (RAND_MAX + 1.));
-    color.print();
 }
 
 void BoundingBox::setPoints(float numx0, float numx1, float numy0, float numy1, float numz0, float numz1){
@@ -34,7 +33,7 @@ void BoundingBox::addTriangle(Triangle* triangle){
 void BoundingBox::divideBoundingBox(int level){
     std::vector<Vector3f> points;
     points.push_back(Vector3f(x0,y0,z0));
-    points.push_back(Vector3f((x0+x1)/2+eps,(y0+y1)/2+eps,(z0+z1)/2+eps));
+    points.push_back(Vector3f((x0+x1)/2,(y0+y1)/2,(z0+z1)/2));
     points.push_back(Vector3f(x1,y1,z1));
     for (int x = 0; x < 2; x++){
         for (int y = 0; y < 2; y++){
@@ -63,38 +62,46 @@ void BoundingBox::divideBoundingBox(int level){
 }
 
 bool BoundingBox::isIn(Vector3f point){
-    return point[0] >= (x0 - eps) && point[0] <= (x1 + eps)
-        && point[1] >= (y0 - eps) && point[1] <= (y1 + eps)
-        && point[2] >= (z0 - eps) && point[2] <= (z1 + eps);
+    return point[0] >= (x0 - (x1-x0)/10) && point[0] <= (x1 + (x1-x0)/10)
+        && point[1] >= (y0 - (y1-y0)/10) && point[1] <= (y1 + (y1-y0)/10)
+        && point[2] >= (z0 - (z1-z0)/10) && point[2] <= (z1 + (z1-z0)/10);
 }
+
+bool comparator(const std::tuple<HitPoint,int>& lhs, const std::tuple<HitPoint,int>& rhs) {
+    return std::get<0>(lhs).distance < std::get<0>(rhs).distance;
+};
 
 HitPoint BoundingBox::shootRay(Ray &ray, bool isLight){
     HitPoint hitPoint;
     HitPoint bbHit = isHit(ray);
     if (bbHit.isHit){
-        hitPoint = bbHit;
-        hitPoint.color = 0.1 * color;
         if (children.size() > 0){
-            //hhitPoint = {};
-            float distance = 0.0;
+            hitPoint = {};
+            std::vector<std::tuple<HitPoint,int>> childHitPoints;
             for (int i = 0; i < children.size(); i++){
-                HitPoint newHit = children[i]->shootRay(ray, isLight);
-                distance = std::max(newHit.distance,distance);
-                if(newHit.isHit) hitPoint.color = hitPoint.color + newHit.color;
-                /* if(newHit.isHit && (!hitPoint.isHit || (eps < newHit.distance && newHit.distance < hitPoint.distance))){
+                HitPoint childHit = children[i]->isHit(ray);
+                if(childHit.isHit) childHitPoints.push_back(std::make_tuple(childHit,i));
+/*                 HitPoint newHit = children[i]->shootRay(ray, isLight);
+                if(newHit.isHit && (!hitPoint.isHit || (eps < newHit.distance && newHit.distance < hitPoint.distance))){
                     hitPoint = newHit;
                     if(isLight){
                         break;
                     }
                 } */
-                //hitPoint.distance = distance;
+            };
+            sort(childHitPoints.begin(),childHitPoints.end(), &comparator);
+            for (int i = 0; i < childHitPoints.size(); i++){
+                int index = std::get<1>(childHitPoints[i]);
+                HitPoint newHit = children[index]->shootRay(ray, isLight);
+                if(newHit.isHit){
+                    hitPoint = newHit;
+                    break;
+                }
             }
-        } /* else {
-            hitPoint = {}; */
-            /* float distance = 0.0;
+        } else {
+            hitPoint = {};
             for (int i = 0; i < triangles.size(); i++){
                 HitPoint newHit = triangles[i]->shootRay(ray);
-                distance = std::max(newHit.distance,distance);
                 if(newHit.isHit && (!hitPoint.isHit || newHit.distance < hitPoint.distance)){
                     hitPoint = newHit;
                     if(isLight){
@@ -102,11 +109,7 @@ HitPoint BoundingBox::shootRay(Ray &ray, bool isLight){
                     }
                 }
             }
-            hitPoint.isHit = true;
-            hitPoint.distance = distance; */
-/*             hitPoint = bbHit;
-            hitPoint.color = color;
-        } */
+        }
     }
     return hitPoint;
 }

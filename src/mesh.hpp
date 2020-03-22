@@ -1,7 +1,5 @@
 #pragma once
 #include <vector>
-#include "object.hpp"
-#include "triangle.hpp"
 #include "boundingBox.hpp"
 
 class Mesh : public Object {

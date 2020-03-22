@@ -1,31 +1,23 @@
+#pragma once
 #include <iostream>
 #include <algorithm>
-#include "light.hpp"
+#include "areaLight.hpp"
 
 
-Light::Light(Vector3f pos){
-    position = pos;
+AreaLight::AreaLight(Rect *rect) : area(rect) {
+    area = rect;
 }
 
-Light::Light(Vector3f pos, Vector3f col){
-    position = pos;
-    color = col;
+Vector3f AreaLight::getPosition() {
+    return area->getVertex(0);
 }
 
-void Light::setTransformation(Matrix4f mat){
-    transf = mat;
-}
-
-Vector3f Light::getPosition(){
-    return position;
-}
-
-Vector3f Light::lightObject(HitPoint &objectHP){
+Vector3f AreaLight::lightObject(HitPoint &objectHP){
     Vector3f hitColor = Vector3f(0,0,0);
     Vector3f eyedirn = (-1 *objectHP.point).normalized();
     Vector3f l, h;
     //point
-    l = (position - objectHP.point).normalized();
+    l = (getPosition() - objectHP.point).normalized();
     h = (l + eyedirn).normalized();
     float max = std::max(Vector3f::dot(objectHP.normal,l),(float) 0);
     hitColor = hitColor + color * objectHP.color * max;

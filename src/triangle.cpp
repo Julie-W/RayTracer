@@ -1,5 +1,5 @@
 #include "triangle.hpp"
-static float eps = 0.001;
+static float eps = 0.00001;
 
 Triangle::Triangle(Vector3f p1, Vector3f p2, Vector3f p3) {
     vertices.push_back(p1);

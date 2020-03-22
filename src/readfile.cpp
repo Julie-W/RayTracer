@@ -34,13 +34,26 @@ void readfile(const char* filename, Scene* scene) {
                 std::stringstream s(str);
                 s >> cmd; 
                 int i; 
-                float values[12]; // Position and color for light, colors for others
+                float values[15]; // Position and color for light, colors for others
                 bool validinput; // Validity of input 
                 if (cmd == "light") {
-                    validinput = readvals(s, 6, values); // Position/color for lts.
-                    if (validinput) {
-                        Light light = Light(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]));
-                        scene->addLight(light);
+                    std::string type;
+                    s >> type;
+                    if (type == "point") {
+                        validinput = readvals(s, 6, values); // Position/color for lts.
+                        if (validinput) {
+                            PointLight *light = new PointLight(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]));
+                            scene->addLight(light);
+                        }
+                    } else if (type == "area"){
+                        validinput = readvals(s, 15, values); // Position/color for lts.
+                        if (validinput) {
+                            Rect *rect = new Rect(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5])
+                                ,Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]),Vector3f(values[10],values[13],values[14]));
+                            AreaLight *light = new AreaLight(rect);
+                            scene->addLight(light);
+                            scene->addObject(rect);
+                        }
                     }
                 } else if (cmd == "ambient") {
                     validinput = readvals(s, 3, values); // colors 
@@ -146,7 +159,7 @@ void readMesh(std::string filename, Mesh* mesh){
                 ss >> n2; 
                 ss >> n3;
                 if (type == "v") {
-                    vecv.push_back(Vector3f(std::stof(n1)*2,std::stof(n2)*2,std::stof(n3)*2-10));
+                    vecv.push_back(Vector3f(std::stof(n1),std::stof(n2),std::stof(n3)-10));
                 } else if (type == "vn") {
                     vecn.push_back(Vector3f(std::stof(n1),std::stof(n2),std::stof(n3)));
                 }
@@ -158,7 +171,7 @@ void readMesh(std::string filename, Mesh* mesh){
 void initializeDefaultScene(Scene* scene){
     Sphere *sphere = new Sphere(2,Vector3f(0,0,-10),Vector3f(1,0,0));
     Plane *floor = new Plane(Vector3f(0,-3,0),Vector3f(1,-3,0),Vector3f(1,-3,1),Vector3f(0,0,1));
-    Light light = Light(Vector3f(5,0,-5));
+    PointLight *light = new PointLight(Vector3f(5,0,-5));
     scene->addObject(sphere);
     scene->addObject(floor);
     scene->addLight(light);

@@ -11,7 +11,7 @@ HitPoint Plane::shootRay(Ray &ray, bool isLight){
     HitPoint hitPoint = {};
     float top = Vector3f::dot(a-ray.getStart(),normal);
     float bottom = Vector3f::dot(ray.getDirection(),normal);
-    if (bottom > 0) {
+    if (bottom != 0) {
         float distance = top / bottom;
         if (distance > eps){
             hitPoint.distance = distance;

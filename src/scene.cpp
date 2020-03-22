@@ -1,5 +1,4 @@
 #include "scene.hpp"
-#include "light.hpp"
 
 Scene::Scene (){
     transf = Matrix4f();
@@ -13,7 +12,7 @@ void Scene::addObject(Object *obj){
     objects.push_back(obj);
 }
 
-void Scene::addLight(Light &light){
+void Scene::addLight(Light *light){
     lights.push_back(light);
 }
 
@@ -37,7 +36,7 @@ Vector3f Scene::getColor(Ray &ray){
         if (Vector3f::dot(hitPoint.normal,ray.getDirection())>0.0001){
             hitPoint.normal = -1*hitPoint.normal;
         }
-        color = hitPoint.color; //getLighting(hitPoint);
+        color = getLighting(hitPoint);
     }
     return color;
 }
@@ -51,18 +50,18 @@ Vector3f Scene::getLighting(HitPoint &hitPoint){
     for (int i = 0; i < lights.size(); i++)
     {
         isHit = false;
-        Ray lightRay = Ray(hitPoint.point,lights[i].getPosition());
+        Ray lightRay = Ray(hitPoint.point,lights[i]->getPosition());
         for (int j = 0; j < objects.size(); j++)
         {
             lightHit = objects[j]->shootRay(lightRay, true); 
             // put this in ray intersection 
-            if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i].getPosition()-hitPoint.point)).abs()){
+            if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i]->getPosition()-hitPoint.point)).abs()){
                 isHit = true;
                 break;
             }
         }
         if (!isHit) {
-            color = color + lights[i].lightObject(hitPoint); 
+            color = color + lights[i]->lightObject(hitPoint); 
         }
     }
     return color;

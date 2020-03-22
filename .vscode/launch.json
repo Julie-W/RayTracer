@@ -10,7 +10,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bazel-out/x64_windows-dbg/bin/main.exe",
-            "args": ["${workspaceFolder}/teapot.txt"],
+            "args": ["${workspaceFolder}/areaLight.txt"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

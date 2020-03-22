@@ -6,7 +6,6 @@
 #include <sstream>
 #include <thread>
 #include <chrono>
-#include "scene.hpp"
 #include "viewPlane.hpp"
 #include "readfile.h"
 
@@ -53,7 +52,7 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
     for(int y = yStart; y < yStart + yPixelsPerBlock; y++){
         for(int x = xStart; x < xStart + xPixelsPerBlock; x++){
             UINT32 *pixel = (UINT32 *)(buffer.bitmapMemory) + y*buffer.width + x;
-            Vector3f color = viewPlane.getPixelColor(x,y); 
+            Vector3f color = viewPlane.getPixelColor(x,y);
             // Pixel in memory: bb gg rr xx
             UINT8 blue = color[2]*255 > 255? 255 : color[2]*255;
             UINT8 green = color[1]*255 > 255? 255 : color[1]*255;
@@ -66,7 +65,7 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
 void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 90);
+    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 65);
     Scene scene = Scene();
     readfile(filename, &scene);
     viewPlane.setScene(&scene);
@@ -75,11 +74,11 @@ void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::vector<std::thread> threads;
     for(int blockY = 0; blockY < 4; blockY++){
         for(int blockX = 0; blockX < 4; blockX++){
-            renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
+            //renderBlock(buffer,viewPlane,blockX,xPixelsPerBlock,blockY,yPixelsPerBlock);
             HDC deviceContext = GetDC(windowHandle);
             windowDimension dim = getWindowDimension(windowHandle);
             displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
-            //threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
+            threads.push_back(std::thread(renderBlock,std::ref(buffer),std::ref(viewPlane),blockX,xPixelsPerBlock,blockY,yPixelsPerBlock));
         }
     }
     HDC deviceContext = GetDC(windowHandle);
@@ -164,7 +163,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
     std::cout << filename << std::endl;
     const char* fn = filename;
     WNDCLASSA windowClass = {};
-    resizeDIBSection(backBuffer,960,540);//1920,1080);
 
     windowClass.style = CS_HREDRAW|CS_VREDRAW;
     windowClass.lpfnWndProc = mainWindowCallback;
@@ -174,15 +172,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
         HWND windowHandle = CreateWindowExA(
             0, windowClass.lpszClassName,
             "RayTracer",
-            WS_OVERLAPPEDWINDOW|WS_VISIBLE,
+            WS_OVERLAPPEDWINDOW|WS_VISIBLE|WS_MAXIMIZE,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
             CW_USEDEFAULT,
             0, 0, hInstance, 0);
+        
         if(windowHandle){
             // need to take messages off the queue -> loop through messages
             running = true;
+            HDC deviceContext = GetDC(windowHandle);
+            windowDimension dim = getWindowDimension(windowHandle);
+            resizeDIBSection(backBuffer,dim.width,dim.height);//1920,1080)
             render(backBuffer,windowHandle, fn);
             while(running){
                 MSG message;
@@ -193,8 +195,6 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
                 } else {
                     break; // windows cleans up
                 }
-                HDC deviceContext = GetDC(windowHandle);
-                windowDimension dim = getWindowDimension(windowHandle);
                 displayBuffer(backBuffer, deviceContext, 0, 0, dim.width, dim.height);
                 ReleaseDC(windowHandle,deviceContext);
                 std::this_thread::sleep_for (std::chrono::milliseconds(100));
