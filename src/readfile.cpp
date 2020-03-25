@@ -46,10 +46,11 @@ void readfile(const char* filename, Scene* scene) {
                             scene->addLight(light);
                         }
                     } else if (type == "area"){
-                        validinput = readvals(s, 15, values); // Position/color for lts.
+                        validinput = readvals(s, 12, values); // Position/color for lts.
                         if (validinput) {
                             Rect *rect = new Rect(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5])
-                                ,Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]),Vector3f(values[10],values[13],values[14]));
+                                ,Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]));
+                            rect->setEmissive();
                             AreaLight *light = new AreaLight(rect);
                             scene->addLight(light);
                             scene->addObject(rect);
@@ -99,6 +100,13 @@ void readfile(const char* filename, Scene* scene) {
                         Triangle *triangle = new Triangle(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]),
                             Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]));
                         scene->addObject(triangle);
+                    }
+                } else if (cmd == "rect") {
+                    validinput = readvals(s, 12, values); 
+                    if (validinput) {
+                        Rect *rect = new Rect(Vector3f(values[0],values[1],values[2]),Vector3f(values[3],values[4],values[5]),
+                            Vector3f(values[6],values[7],values[8]),Vector3f(values[9],values[10],values[11]));
+                        scene->addObject(rect);
                     }
                 } else if (cmd == "mesh") {
                     std::string filename;
@@ -159,7 +167,7 @@ void readMesh(std::string filename, Mesh* mesh){
                 ss >> n2; 
                 ss >> n3;
                 if (type == "v") {
-                    vecv.push_back(Vector3f(std::stof(n1),std::stof(n2),std::stof(n3)-10));
+                    vecv.push_back(Vector3f(0.5*std::stof(n1),0.5*std::stof(n2),0.5*std::stof(n3)-10));
                 } else if (type == "vn") {
                     vecn.push_back(Vector3f(std::stof(n1),std::stof(n2),std::stof(n3)));
                 }
