@@ -7,6 +7,7 @@ struct HitPoint {
     Vector3f point;
     Vector3f normal;
     Vector3f color = Vector3f(0,0,0);
+    bool emissive = false;
 };
 
 class Ray {

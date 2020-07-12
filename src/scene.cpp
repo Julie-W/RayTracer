@@ -37,6 +37,9 @@ Vector3f Scene::getColor(Ray &ray){
             hitPoint.normal = -1*hitPoint.normal;
         }
         color = getLighting(hitPoint);
+        if (hitPoint.emissive) {
+            color += hitPoint.color;
+        }
     }
     return color;
 }
@@ -49,20 +52,23 @@ Vector3f Scene::getLighting(HitPoint &hitPoint){
     bool isHit;
     for (int i = 0; i < lights.size(); i++)
     {
-        isHit = false;
+        color = color + lights[i]->getLighting(hitPoint,objects);
+/*         isHit = false;
         Ray lightRay = Ray(hitPoint.point,lights[i]->getPosition());
         for (int j = 0; j < objects.size(); j++)
         {
-            lightHit = objects[j]->shootRay(lightRay, true); 
-            // put this in ray intersection 
-            if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i]->getPosition()-hitPoint.point)).abs()){
-                isHit = true;
-                break;
+            if (!objects[j]->isEmissive()) {
+                lightHit = objects[j]->shootRay(lightRay, true); 
+                // put this in ray intersection 
+                if (lightHit.isHit && lightHit.distance < (Vector3f(lights[i]->getPosition()-hitPoint.point)).abs()){
+                    isHit = true;
+                    break;
+                }
             }
         }
         if (!isHit) {
             color = color + lights[i]->lightObject(hitPoint); 
-        }
+        } */
     }
     return color;
 }

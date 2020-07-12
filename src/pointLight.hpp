@@ -9,5 +9,5 @@ private:
 public:
     PointLight (Vector3f);
     PointLight (Vector3f, Vector3f);
-    Vector3f lightObject(HitPoint&);
+    Vector3f getLighting(HitPoint&,std::vector<Object*>);
 };

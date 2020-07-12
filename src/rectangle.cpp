@@ -1,35 +1,45 @@
 #include "rectangle.hpp"
 static float eps = 0.00001;
 
-Rect::Rect(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4) {
-    triangles.push_back(Triangle(p1,p2,p3));
-    triangles.push_back(Triangle(p2,p3,p4));
+Rect::Rect(Vector3f p1, Vector3f a, Vector3f b) {
+    vertices.push_back(p1);
+    vertices.push_back(a);
+    vertices.push_back(b);
+    normal = Vector3f::cross(a,b);
 }
 
-Rect::Rect(Vector3f p1, Vector3f p2, Vector3f p3, Vector3f p4, Vector3f col) {
-    triangles.push_back(Triangle(p1,p2,p3,col));
-    triangles.push_back(Triangle(p2,p3,p4,col));
+Rect::Rect(Vector3f p1, Vector3f a, Vector3f b, Vector3f col) {
+    vertices.push_back(p1);
+    vertices.push_back(a);
+    vertices.push_back(b);
+    normal = Vector3f::cross(a,b);
     color = col;
 }
 
 Vector3f Rect::getVertex(int index){
-    if (index == 3){
-        return triangles[1].getVertex(2);
-    } else {
-        return triangles[0].getVertex(index);
-    }
+    return vertices[index];
 }
 
 HitPoint Rect::shootRay(Ray &ray, bool isLight){
-    HitPoint hitPoint1 = triangles[0].shootRay(ray, isLight);
-    if(hitPoint1.isHit && isLight){
-        return hitPoint1;
-    } else {
-        HitPoint hitPoint2 = triangles[1].shootRay(ray, isLight);
-        if (hitPoint1.isHit && (!hitPoint2.isHit || (hitPoint1.distance < hitPoint2.distance))) {
-            return hitPoint1;
-        } else {
-            return hitPoint2;
+    HitPoint hitPoint = {};
+    float top = Vector3f::dot(vertices[0]-ray.getStart(),normal);
+    float bottom = Vector3f::dot(ray.getDirection(),normal);
+    if (bottom != 0) {
+        float distance = top / bottom;
+        if (distance > eps){
+            Vector3f p = ray.getStart() + distance*ray.getDirection();
+            float dotA = Vector3f::dot(p - vertices[0],vertices[1]);
+            float dotB = Vector3f::dot(p - vertices[0],vertices[2]);
+            if ((dotA >= 0) && (dotA <= Vector3f::dot(vertices[1],vertices[1])) 
+                && (dotB >= 0) && (dotB <= Vector3f::dot(vertices[2],vertices[2]))) {
+                    hitPoint.isHit = true;
+                    hitPoint.color = color;
+                    hitPoint.distance = distance;
+                    hitPoint.normal = normal;
+                    hitPoint.point = p;
+                    hitPoint.emissive = emissive;
+            }
         }
     }
+    return hitPoint;
 }

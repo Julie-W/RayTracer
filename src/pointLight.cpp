@@ -12,16 +12,25 @@ PointLight::PointLight(Vector3f pos, Vector3f col){
     color = col;
 }
 
-Vector3f PointLight::lightObject(HitPoint &objectHP){
-    Vector3f hitColor = Vector3f(0,0,0);
-    Vector3f eyedirn = (-1 *objectHP.point).normalized();
-    Vector3f l, h;
-    //point
-    l = (position - objectHP.point).normalized();
-    h = (l + eyedirn).normalized();
-    float max = std::max(Vector3f::dot(objectHP.normal,l),(float) 0);
-    hitColor = hitColor + color * objectHP.color * max;
-        //+ specular * pow(max(dot(objectHP.normal,h),0.0),shininess));
-
-    return hitColor;
+Vector3f PointLight::getLighting(HitPoint &hp, std::vector<Object*> objs){
+    Vector3f color = Vector3f(0);
+    HitPoint lightHit = {};
+    bool isHit = false;
+    Vector3f point = getPosition();
+    Ray lightRay = Ray(hp.point,point);
+    for (int j = 0; j < objs.size(); j++)
+    {
+        if (!objs[j]->isEmissive()) {
+            lightHit = objs[j]->shootRay(lightRay, true); 
+            // put this in ray intersection 
+            if (lightHit.isHit && lightHit.distance < (Vector3f(point-hp.point)).abs()){
+                isHit = true;
+                break;
+            }
+        }
+    }
+    if (!isHit) {
+        color = color + lightObject(hp, point); 
+    }
+    return color;
 }

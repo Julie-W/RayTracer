@@ -8,7 +8,7 @@ Ray::Ray(Vector3f dir, int distance){
 
 Ray::Ray(Vector3f v1, Vector3f v2){ 
     direction = (v2-v1).normalized();
-    start = v1 + direction*0.5;
+    start = v1 + direction*0.05;
 }
 
 Vector3f Ray::getDirection(){
