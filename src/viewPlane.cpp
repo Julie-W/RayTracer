@@ -19,6 +19,6 @@ Vector3f ViewPlane::getPixelColor(int x, int y){
     float xCoord = distance * (float)tan(fovx/2)*((x-width/2.0)/(width/2.0));
     float yCoord = distance * (float)tan(fovy/2)*((height/2.0-y)/(height/2.0));
     direction = Vector3f(xCoord,yCoord,-distance);
-    Ray ray = Ray(direction);  
+    Ray ray = Ray(direction, distance);
     return scene->getColor(ray);
 }

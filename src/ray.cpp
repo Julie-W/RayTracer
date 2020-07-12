@@ -1,12 +1,12 @@
 #include "ray.hpp"
 #include <algorithm>
 
-Ray::Ray(Vector3f dir){
+Ray::Ray(Vector3f dir, int distance){
     direction = dir.normalized();
-    start = Vector3f(0);
+    start = Vector3f(0,0,distance);
 }
 
-Ray::Ray(Vector3f v1, Vector3f v2){
+Ray::Ray(Vector3f v1, Vector3f v2){ 
     direction = (v2-v1).normalized();
     start = v1 + direction*0.5;
 }

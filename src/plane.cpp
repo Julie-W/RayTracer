@@ -18,7 +18,7 @@ HitPoint Plane::shootRay(Ray &ray, bool isLight){
             hitPoint.isHit = true;
         }
     }
-    hitPoint.point = hitPoint.distance * ray.getDirection();
+    hitPoint.point = ray.getStart() + hitPoint.distance * ray.getDirection();
     hitPoint.color = color;
     hitPoint.normal = normal;
     return hitPoint;

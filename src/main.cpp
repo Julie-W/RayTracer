@@ -65,7 +65,7 @@ void renderBlock(offscreenBuffer &buffer, ViewPlane &viewPlane, int xBlock, int 
 void render(offscreenBuffer &buffer, HWND windowHandle, const char* filename){
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 65);
+    ViewPlane viewPlane = ViewPlane(1, buffer.width, buffer.height, 50);
     Scene scene = Scene();
     readfile(filename, &scene);
     viewPlane.setScene(&scene);
